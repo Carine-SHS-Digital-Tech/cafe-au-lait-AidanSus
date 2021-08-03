@@ -54,12 +54,32 @@ namespace menu
 		{ "latte", 2.0f, },
 	};
 
+	
 	void iterate_items(std::function<void(menu_item&)> callback)
 	{
-
 		//For each item invoke the callback
 		for (auto & current_item : menu_items)
 			callback(current_item);
+	}
+
+	menu_item& get_item(const std::string& name)
+	{
+
+		for(auto & current_item : menu_items)
+		{ 
+			if (current_item.name() == name)
+				return current_item;
+		}
+
+	}
+
+	const bool is_valid(const std::string& name)
+	{
+
+		for (auto& current_item : menu_items)
+			if (current_item.name() == name) return true;
+
+		return false;
 
 	}
 
