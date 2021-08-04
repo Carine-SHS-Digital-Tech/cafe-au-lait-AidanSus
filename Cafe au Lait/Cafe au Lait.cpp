@@ -6,7 +6,7 @@ void new_order()
     system("cls");
 
     printf("New Order\n");
-    printf("\tDine-in or take-away? ");
+    printf("Dine-in or take-away? ");
     std::string order_type_str = util::get_lower_input();
     order_type order_type = dine_in;
 
@@ -21,7 +21,7 @@ void new_order()
         return;
     };
 
-    printf("\tEnter order items below.\n");
+    printf("Enter order items below.\n");
     
     std::vector<std::string> order_items;
 
@@ -50,11 +50,11 @@ void new_order()
 void daily_summary()
 {
       
-    menu::iterate_items([&](menu_item* item) {
+    printf_s("Total take-away orders: %i\n", sales_info::takeaway_ordered);
+    printf_s("Total dine-in   orders: %i\n",   sales_info::dinein_ordered);
+    printf_s("Total orders: %i\n", sales_info::total_orders());
+    printf_s("Total cups ordered: %i\n", sales_info::total_cups());
 
-        printf("%s ordered %i times.", item->name(), item->order_count());
-
-    });
 
     getchar();
 
@@ -64,19 +64,24 @@ int main()
 {
     
     std::string operation{ " " };
-
+        
     while (operation != "")
     {
         system("cls");
 
-        printf("New Order or Daily Summary: ");
+        printf("New Order(1) or Daily Summary(2): ");
         operation = util::get_lower_input();
                 
-        if (operation == "new order")
+        if (operation == "1")
             new_order();
-        else if (operation == "daily summary")
+        else if (operation == "2")
             daily_summary();
-        else break;
+        else
+        {
+            printf_s("Invalid operation: %s\n", operation.c_str());
+            getchar();
+        }
+
     }
 
 }

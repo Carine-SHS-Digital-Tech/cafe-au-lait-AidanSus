@@ -10,6 +10,7 @@ namespace sales_info
 {
 
 	uint16_t takeaway_ordered{ 0 }, dinein_ordered{ 0 };
+	extern uint16_t total_cups_ordered{ 0 };
 
 	void send_order(std::vector<std::string> order_items, order_type order_type)
 	{
@@ -25,6 +26,11 @@ namespace sales_info
 		int icedcof_orders{ 0 };
 		int espress_orders{ 0 };
 
+		if (order_type == dine_in)
+			sales_info::dinein_ordered++;
+		else if (order_type == take_away)
+			sales_info::takeaway_ordered++;
+
 		for(std::string order_item: order_items)
 		{ 
 
@@ -36,6 +42,7 @@ namespace sales_info
 			total_order += current_item->price();
 			total_order_gst += current_item->gst();			
 			current_item->order();
+			total_cups_ordered++;
 
 		}
 
@@ -64,6 +71,16 @@ namespace sales_info
 		printf("Press enter to continue.\n");
 		getchar();
 
+	}
+
+	__forceinline uint16_t total_orders()
+	{
+		return takeaway_ordered + dinein_ordered;
+	}
+
+	__forceinline uint16_t total_cups()
+	{
+		return total_cups_ordered;
 	}
 
 }

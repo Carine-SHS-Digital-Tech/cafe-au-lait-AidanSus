@@ -66,11 +66,10 @@ namespace menu
 	//vector which holds our menu items
 	std::vector<menu_item> menu_items = {
 		{ "cappuccino", 3.0f },
-		{ "espresso", 2.0f },
-		{ "iced coffee", 2.0f },
-		{ "latte", 2.0f, },
+		{ "espresso", 2.25f },
+		{ "iced coffee", 2.5f },
+		{ "latte", 2.5f, },
 	};
-
 	
 	void iterate_items(std::function<void(menu_item*)> callback)
 	{
