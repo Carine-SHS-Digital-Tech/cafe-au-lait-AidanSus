@@ -7,12 +7,14 @@ void new_order()
 
     printf("New Order\n");
     printf("\tDine-in or take-away? ");
-    std::string order_type = util::get_lower_input();
+    std::string order_type_str = util::get_lower_input();
+    order_type order_type = dine_in;
 
-    if (order_type == "dine in")
-        sales_info::dinein_ordered++;
-    else if (order_type == "take away")
-        sales_info::takeaway_ordered++;
+
+    if (order_type_str == "dine in")
+        order_type = dine_in;
+    else if (order_type_str == "take away")
+        order_type = take_away;
     else 
     {
         printf("Invalid order type\n");
@@ -21,27 +23,36 @@ void new_order()
 
     printf("\tEnter order items below.\n");
     
+    std::vector<std::string> order_items;
+
     while (true)
     {
 
-        std::string current_item = util::get_lower_input();
+        const std::string& current_item = util::get_lower_input();
+        
+        if (current_item == "")
+            break;
 
         if (!menu::is_valid(current_item))
-            return;
+        {
+            printf("Invalid item: %s\n", current_item.c_str());
+            continue;
+        }
 
-        menu_item &ordered_item = menu::get_item(current_item);
-        ordered_item.order();
+        order_items.push_back(current_item);
 
     }
+
+    sales_info::send_order(order_items, order_type);
 
 }
 
 void daily_summary()
 {
       
-    menu::iterate_items([&](menu_item& item) {
+    menu::iterate_items([&](menu_item* item) {
 
-        printf("%s ordered %i times.", item.name(), item.order_count());
+        printf("%s ordered %i times.", item->name(), item->order_count());
 
     });
 
