@@ -1,16 +1,21 @@
+//Header guards
 #pragma once
 
 namespace gui
 {
-
+	
+	//Globals
+	//Booleans to store whether a window is opne
 	bool order_summary_open{ false };
 	bool insufficient_funds_open{ false };
 	bool take_away{ false };
-	float amount_tendered;
-
-	const uint16_t width = 1280;
-	const uint16_t height = 720;
-
+	float amount_tendered{ 0 };
+	
+	//Fixed values
+	const uint16_t width{ 1280 };
+	const uint16_t height{ 720 };
+	
+	//Initialisation of ImGui
 	void init(GLFWwindow * window)
 	{
 
@@ -39,10 +44,10 @@ namespace gui
 
 	void daily_summary()
 	{
-
+		
 		ImGui::Text("Daily Statistics");
 		ImGui::Separator();
-
+		
 		if (ImGui::BeginTable("dailysummary##table", 6, ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX))
 		{
 
@@ -72,24 +77,32 @@ namespace gui
 			ImGui::EndTable();
 
 		}
-
-		if (ImGui::Button("Dump to CSV file"))
+	
+		if (ImGui::Button("Open in excel"))
 		{
-
+			
+			//Create an output file stream
 			std::ofstream csv_file("daily_summary.csv");
-
+			
+			//Write the headers
 			csv_file << "ORDERS_COUNT,DINE-IN,TAKE-AWAY,CAPPUCCINO_COUNT,ESPRESSO_COUNT,LATTE_COUNT,ICED_COFFEE_COUNT,CUPS_COUNT,GST_COLLECTED,DAILY_INCOME\n";
+			//Write the contents
 			csv_file << (sales_info::dinein_orders + sales_info::takeaway_orders) << "," << sales_info::dinein_orders << "," << sales_info::takeaway_orders << ",";
-
+			
+			//Iterate through menu items and write totals
 			for (auto& item : menu::menu_items)
 			{
 				
+				//Retrieve the total times an item was ordered
 				csv_file << item.total() << ",";
 
 			}
-			
+				
 			csv_file << sales_info::total_cups << "," << sales_info::gst << "," << sales_info::income << "\n";
-
+			
+			//Open excel after writing
+			system("start excel.exe daily_summary.csv");
+			
 		}
 
 	}
@@ -100,19 +113,25 @@ namespace gui
 		float running_total{ 0 };
 		float running_total_gst{ 0 };
 		uint16_t total_cups{ 0 };
-
+		
+		//Checkbox to get whether the order is takeaway or not
 		ImGui::Checkbox("Take Away", &take_away);
-
+		
+		//Iterate items and draw them 
 		for ( auto& item  : menu::menu_items)
 		{
 
 			const std::string& item_name = item.name();
+			//Create a unique id for each button as they don't function by default
 			std::string item_id = item_name + "button";
-			unsigned int &item_quantity = item.order_total();
+			//Get reference to the item variables for writing
+			unsigned int& item_quantity = item.order_total();
 			unsigned int& total_quantity = item.total();
 
+			//Push new ID onto the stack 
 			ImGui::PushID(item_id.c_str());
-
+			
+			//Buttons to change quantities
 			if (ImGui::Button("-", ImVec2(25.f, 25.f)))
 			{
 				if (item_quantity)
@@ -135,11 +154,13 @@ namespace gui
 
 			ImGui::SameLine();			
 			ImGui::Text(item_name.c_str());
+			//Pop id off the stack to restore it to how it was before
 			ImGui::PopID();
-
+				
+			//Change total depending on takeaway
 			if (take_away)
 			{
-
+		
 				running_total += (item_quantity * (item.price() * 1.05));
 				running_total_gst += (item_quantity * (item.price_gst() * 1.05));
 
@@ -154,16 +175,19 @@ namespace gui
 			
 
 		}
-
+		
+		//Print order total
 		ImGui::Text("Order Total (No GST): %.2f", running_total);
 		ImGui::Text("Order Total (GST): %.2f", running_total_gst);
 		if (ImGui::Button("Order") && running_total)
 			order_summary_open = true;
 
 		if (order_summary_open)
-		{
+		{	
+			//Centre the order summary
 			ImGui::SetNextWindowPos({ width / 3, height / 3 }, ImGuiCond_Once);
-
+			
+			//Draw order summary window
 			if (ImGui::Begin("Order Summary", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
 			{
 
@@ -177,7 +201,8 @@ namespace gui
 					ImGui::TableSetupColumn("Gst");
 					ImGui::TableSetupColumn("Total Price");
 					ImGui::TableHeadersRow();
-
+					
+					//Iterate through items and draw the table entries for them
 					for (auto& item : menu::menu_items)
 					{
 						ImGui::TableNextRow();
@@ -203,17 +228,19 @@ namespace gui
 
 				if (take_away)
 					ImGui::Text("5%% surcharge for takeaway order");
-
+				
 				ImGui::Text("Amount Due: %.2f", running_total_gst);
 				ImGui::InputFloat("Amount tendered", &amount_tendered, 0, 0, "%.2f");
 				ImGui::Text("Change: %.2f", amount_tendered - running_total_gst);
-
+				
 				if (ImGui::Button("OK"))
 				{
-
+					
+					//Checks to determine whether the amount they're giving us is valid
 					if (amount_tendered >= running_total_gst)
 					{
-
+						
+						//Close the window
 						order_summary_open = false;
 
 						//Actually add to the statistics and clear the item orders
@@ -229,7 +256,6 @@ namespace gui
 						}
 
 						sales_info::income += running_total_gst;
-
 
 						if (take_away)
 							sales_info::takeaway_orders++;
@@ -253,17 +279,20 @@ namespace gui
 
 		ImGui::Begin("Cafe Au Lait", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		
+		//Draw the tabs
 		if (ImGui::BeginTabBar("#tabs"))
 		{
 
 			if (ImGui::BeginTabItem("Order"))
 			{
+				//Render the order tab
 				order_tab();
 				ImGui::EndTabItem();
 			}
 			
 			if (ImGui::BeginTabItem("Daily Summary"))
 			{
+				//Render the summary tab
 				daily_summary();
 				ImGui::EndTabItem();
 			}
@@ -279,7 +308,7 @@ namespace gui
 
 	void destroy()
 	{
-
+		//Discard of the context and do the appropriate shutdowns.
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();	
