@@ -9,12 +9,14 @@ private:
 	unsigned int current_order_total{ 0 };
 	unsigned int total_orders{ 0 };
 public:
+	//Basic constructor
 	menu_item(const char* name, float _price)
 		: item_name(name), item_price(_price)
 	{
 	}
 
 	//Inline the getters as they are small functions
+	//Inline keyword just copies the compiled asm to where the function is called
 	inline const std::string& name()
 	{
 		return item_name;
@@ -25,7 +27,7 @@ public:
 	{
 		return current_order_total;
 	}
-
+	
 	inline unsigned int& total()
 	{
 		return total_orders;
